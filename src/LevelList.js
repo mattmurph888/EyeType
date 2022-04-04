@@ -6,8 +6,8 @@ function LevelList({levels, selectLevel}) {
 
   return (
     <div className='level-grid'>
-      {levels.map(level => {
-        return <Level level={level} selectLevel={selectLevel} key={level.id}/>
+      {levels.map((level,index )=> {
+        return <Level level={level} selectLevel={selectLevel} id={index} key={index}/>
       })}
     </div>
   )

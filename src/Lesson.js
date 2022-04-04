@@ -85,8 +85,8 @@ function Lesson({lessons, setLessons, levelSelected, selectLevel, previousData, 
   useEffect (() => {
     if (!timerOn && started) {
       let tempLessonData = [...lessons];
-      if (speed > tempLessonData[levelSelected-1].speed){
-        tempLessonData[levelSelected-1].speed = speed;
+      if (speed > tempLessonData[levelSelected].speed){
+        tempLessonData[levelSelected].speed = speed;
       }
       setLessons(tempLessonData);
       handlePreviousDataChange();
@@ -135,7 +135,7 @@ function Lesson({lessons, setLessons, levelSelected, selectLevel, previousData, 
   ));
 
   function setRows () {
-    let textWords = lessons[levelSelected-1].text.split(" ");
+    let textWords = lessons[levelSelected].text.split(" ");
     textWords = textWords.map(word => (word = word + " "));
     let lastItem = textWords.pop();
     lastItem = lastItem.slice(0,lastItem.length-1);
@@ -157,7 +157,6 @@ function Lesson({lessons, setLessons, levelSelected, selectLevel, previousData, 
         curRowIndex = curWord.length;
       }
     }
-    // console.log(textRows);
     return textRows;
   }
 

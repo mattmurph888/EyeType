@@ -23,14 +23,18 @@ function App() {
   // sets the display for everything under the header
   function handleMainChange() {
     if (levelSelected === null) {
-      setMain(<LevelList levels={lessons} selectLevel={selectLevel} />);
+      setMain(<LevelList 
+        levels={lessons} 
+        selectLevel={selectLevel} 
+      />);
     } else {
       if (previousData) {
-        console.log("finished");
         setMain(<Overview 
           speed={previousData.speed}
           accuracyInfo={previousData.accuracyInfo}
           time={previousData.time}
+          lesson={lessons[levelSelected]}
+          levelSelected={levelSelected}
         />)
       } else {
         setMain(<Lesson 
@@ -73,40 +77,76 @@ function App() {
 // lesson data - eventually from database
 const LESSONS = [
   {
-    id: 1,
-    text: "i Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    text: "There is nothing wrong with a life of peace and prosperity. I suggest you think about what it is you want from your life.",
     highScore: 0,
     prevAccuracy: 0,
     speed: 0,
     icon: ":D",
-    title: "f & j"
+    title: "Peace and Prosperity"
   },
   {
-    id: 2,
-    text: "i Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+    text: "Failure is only the opportunity to begin agian.",
     highScore: 0,
     prevAccuracy: 0,
     speed: 0,
     icon: ":D",
-    title: "f & j"
+    title: "Failure"
   },
   {
-    id: 3,
-    text: "example text 3",
+    text: "Sometimes, the best way to solve your own problems is to help someone else.",
     highScore: 0,
     prevAccuracy: 0,
     speed: 0,
     icon: ":D",
-    title: "f & j"
+    title: "Help"
   },
   {
-    id: 4,
+    text: "It is important to draw wisdom from many different places. If we take it from only one place, it becomes rigid and stale.",
+    highScore: 0,
+    prevAccuracy: 0,
+    speed: 0,
+    icon: ":D",
+    title: "Wisdom"
+  },
+  {
+    text: "Pride is not the opposite of shame, but its source. True humility is the only antidote to shame.",
+    highScore: 0,
+    prevAccuracy: 0,
+    speed: 0,
+    icon: ":D",
+    title: "Pride"
+  },
+  {
+    text: "Life happens wherever you are, whether you make it or not.",
+    highScore: 0,
+    prevAccuracy: 0,
+    speed: 0,
+    icon: ":D",
+    title: "Life"
+  },
+  {
+    text: "In the darkest times, hope is something you give yourself. That is the meaning of inner strength.",
+    highScore: 0,
+    prevAccuracy: 0,
+    speed: 0,
+    icon: ":D",
+    title: "Hope"
+  },
+  {
+    text: "All good things come to an end.",
+    highScore: 0,
+    prevAccuracy: 0,
+    speed: 0,
+    icon: ":D",
+    title: "Good Things"
+  },
+  {
     text: "fj",
     highScore: 0,
     prevAccuracy: 0,
     speed: 0,
     icon: ":D",
-    title: "f & j"
+    title: "test level"
   }
 ]
 
