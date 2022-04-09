@@ -2,6 +2,7 @@ body {
 	margin: 0;
 	background-color: rgb(218, 216, 210);
 	font-family: monospace;
+	overflow: hidden;
 }
 
 .app {
@@ -24,8 +25,11 @@ body {
 	border-radius: 5px;
 }
 
-.header-icon {
+.header-level {
+	border: none;
 	margin-right: auto;
+	margin-left: 20px;
+	font-size: 1rem;
 }
 
 .level-grid {
@@ -213,16 +217,34 @@ body {
 	flex-direction: column;
 	justify-items: center;
 	align-items: center;
-	justify-content: center;
+	justify-content: space-evenly;
 	border: 1px solid black;
 	height: 100%;
 }
 
+.overview-title {
+	font-size: 3rem;
+}
+
 .overview-speed,
 .overview-accuracy,
-.overview-time,
-.overview-title {
-	font-size: 5em;
+.overview-time {
+	font-size: 4rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.overview-data {
+	/* font-size: 3rem; */
+	display: flex;
+	flex-direction: row;
+	justify-content: space-evenly;
+	width: 75%;
+}
+
+.overview-data span {
+	font-size: 1rem;
 }
 
 .main-container {
