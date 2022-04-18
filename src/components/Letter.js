@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useInput } from '../contexts/InputContext';
 import { useIndexInfo, useUpdateIndexInfo } from '../contexts/IndexInfoContext.js';
 import { useColors, useUpdateColors } from '../contexts/ColorsContext.js';
-import { useAccuracyInfo, useUpdateAccuracyInfo } from '../contexts/AccuracyInfo.js';
+import { useAccuracyInfo, useUpdateAccuracyInfo } from '../contexts/AccuracyInfoContext.js';
 
 function Letter({ letter, rowIndex, wordIndex, letterIndex }) {
   const accuracyInfo = useAccuracyInfo();  // {number of characters correctly typed, number of total key presses, correct/incorrect}

@@ -17,12 +17,14 @@ body {
 	justify-content: flex-end;
 	border: 2px solid black;
 	height: 25px;
+	z-index: 200;
 }
 
 .header-item {
 	margin: 2px;
 	border: 1px solid black;
 	border-radius: 5px;
+	z-index: inherit;
 }
 
 .header-level {
@@ -249,4 +251,20 @@ body {
 
 .main-container {
 	height: calc(100vh - 25px);
+}
+
+
+.calibrator {
+	height: 100vh;
+	background-color: rgb(218, 216, 210);
+	z-index: 75;
+}
+
+.calibrate-button {
+	position: absolute;
+	z-index: 150;
+}
+
+.gaze-lesson-overlay {
+	z-index: -100;
 }

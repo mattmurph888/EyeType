@@ -2,18 +2,30 @@ import React, { useEffect, useState } from 'react';
 import Key from './Key.js';
 import Row from './Row.js';
 import { useUpdateInput } from '../contexts/InputContext.js';
-import { useIndexInfo, useUpdateIndexInfo } from '../contexts/IndexInfoContext.js';
+import {
+	useIndexInfo,
+	useUpdateIndexInfo,
+} from '../contexts/IndexInfoContext.js';
 import { useUpdateColors } from '../contexts/ColorsContext.js';
-import { useAccuracyInfo, useUpdateAccuracyInfo } from '../contexts/AccuracyInfo.js';
+import {
+	useAccuracyInfo,
+	useUpdateAccuracyInfo,
+} from '../contexts/AccuracyInfoContext.js';
+import { useGazeData, useGazeTime } from '../contexts/GazerContext.js';
+import GazeLessonOverlay from './GazeLessonOverlay.js';
 
-function Lesson({ lessons, setLessons, levelSelected, setPreviousData}) {
-
-  const accuracyInfo = useAccuracyInfo();  // {number of characters correctly typed, number of total key presses, correct/incorrect}
-  const setAccuracyInfo = useUpdateAccuracyInfo();
-  const setColors = useUpdateColors();
+function Lesson({ lessons, setLessons, levelSelected, setPreviousData }) {
+	const gazeData = useGazeData();
+	const gazeTime = useGazeTime();
+	const [prevY, setPrevY] = useState([]);
+	const [y, setY] = useState(0);
+	const accuracyInfo = useAccuracyInfo(); // {number of characters correctly typed, number of total key presses, correct/incorrect}
+	const setAccuracyInfo = useUpdateAccuracyInfo();
+	const setColors = useUpdateColors();
 	const indexInfo = useIndexInfo();
 	const setIndexInfo = useUpdateIndexInfo(); // track the row, word, and letter currently being typed
 	const setInput = useUpdateInput();
+	const [bottomLimit, setBottomLimit] = useState(window.innerHeight * 0.9);
 	const [inputCodes, setInputCodes] = useState([]); // stack of currently pressed keycodes
 	const [time, setTime] = useState(0); // time spent on lesson from first key press
 	const [timerOn, setTimerOn] = useState(false); // bool is the lesson timer running?
@@ -21,10 +33,30 @@ function Lesson({ lessons, setLessons, levelSelected, setPreviousData}) {
 	const [numLetters, setNumLetters] = useState(0); // number of letters typed so far in level
 	const [started, setStarted] = useState(false); // was the lesson started?
 	let rows = setRows(); // initializes the text rows for the lesson wndow
+	const boxOffset = window.innerHeight/4;
 
-  // reset contexts when a new level is selected
-  useEffect(() => {
-    resetContexts();
+	useEffect(() => {
+		// console.log(gazeData, gazeTime)
+		handlePrevYChange(gazeData.y);
+		if (gazeData && gazeData.y > bottomLimit) {
+			console.log("don't look at the keyboard!!!");
+		}
+	}, [gazeData, gazeTime, bottomLimit]);
+
+	useEffect(() => {
+		function handleResize() {
+			setBottomLimit(window.innerHeight * 0.9);
+			console.log(bottomLimit);
+		}
+		window.addEventListener('resize', handleResize);
+		return () => {
+			window.removeEventListener('resize', handleResize);
+		};
+	});
+
+	// reset contexts when a new level is selected
+	useEffect(() => {
+		resetContexts();
 	}, [levelSelected]);
 
 	// adds/removes keydown/keyup event listeners
@@ -63,8 +95,8 @@ function Lesson({ lessons, setLessons, levelSelected, setPreviousData}) {
 		let interval = null;
 		if (timerOn) {
 			interval = setInterval(() => {
-				setTime((prevTime) => prevTime + 10);
-			}, 10);
+				setTime((prevTime) => prevTime + 100);
+			}, 100);
 		} else {
 			clearInterval(interval);
 		}
@@ -81,7 +113,7 @@ function Lesson({ lessons, setLessons, levelSelected, setPreviousData}) {
 			}
 			setLessons(tempLessonData);
 			handlePreviousDataChange();
-      resetContexts();
+			resetContexts();
 		}
 	}, [timerOn]);
 
@@ -115,14 +147,23 @@ function Lesson({ lessons, setLessons, levelSelected, setPreviousData}) {
 		setPreviousData(tempData);
 	}
 
+	function handlePrevYChange(newY) {
+		let tempPrevY = prevY;
+		if (tempPrevY.length > 25) {
+			tempPrevY.shift();
+			tempPrevY.push(newY);
+		} else {
+			tempPrevY.push(newY);
+		}
+		const avgY = tempPrevY.reduce((a, b) => a + b) / tempPrevY.length;
+		setPrevY(tempPrevY);
+		setY(avgY);
+ 	}
+
 	// creates all the key components for the keyboard
 	const KEYBOARD_ROWS = KEYBOARD.map((row, i) =>
 		row.keys.map((item, j) => (
-			<Key
-				{...item}
-				inputCodes={inputCodes}
-				key={item.code}
-			/>
+			<Key {...item} inputCodes={inputCodes} key={item.code} />
 		))
 	);
 
@@ -152,36 +193,45 @@ function Lesson({ lessons, setLessons, levelSelected, setPreviousData}) {
 		return textRows;
 	}
 
-  function resetContexts() {
-    setInput(null);
-    setIndexInfo({
-      rowIndex: 0,
-      wordIndex: 0,
-      letterIndex: 0,
-    });
-    setColors({
-      red: 'rgba(230, 92, 92, 0.7)',
-      yellow: 'rgba(223, 230, 92, 0.7)',
-      green: 'rgba(99, 230, 92, 0.7)',
-      curColor: null,
-    });
-    setAccuracyInfo({
-      numCorrect: 0,
-      numTotal: 0,
-      accuracy: 'Start!!!',
-    });
-  }
+	function resetContexts() {
+		setInput(null);
+		setIndexInfo({
+			rowIndex: 0,
+			wordIndex: 0,
+			letterIndex: 0,
+		});
+		setColors({
+			red: 'rgba(230, 92, 92, 0.7)',
+			yellow: 'rgba(223, 230, 92, 0.7)',
+			green: 'rgba(99, 230, 92, 0.7)',
+			curColor: null,
+		});
+		setAccuracyInfo({
+			numCorrect: 0,
+			numTotal: 0,
+			accuracy: 'Start!!!',
+		});
+	}
 
 	return (
 		<div className="lesson">
+
+			<h5
+				style={{
+					position: 'absolute',
+					top: bottomLimit,
+					border: '1px solid black',
+				}}
+			>
+				bottom limit{' '}
+			</h5>
+
+			{<GazeLessonOverlay y={y} boxOffset={boxOffset} />}
+
 			<div className="lesson-top">
 				<div className="lesson-window">
 					{rows.map((row, index) => (
-						<Row
-							words={row}
-							rowIndex={index}
-							key={index}
-						/>
+						<Row words={row} rowIndex={index} key={index} />
 					))}
 				</div>
 			</div>

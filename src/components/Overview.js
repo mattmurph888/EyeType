@@ -32,17 +32,32 @@ function Overview({
 
 	return (
 		<div className="overview">
-
-			<div className="overview-title"> Lesson {levelSelected}: {lesson.title} </div>
+			<div className="overview-title">
+				Lesson {levelSelected}: {lesson.title}{' '}
+			</div>
 
 			<div className="overview-data">
-				<div className="overview-speed"> {speed.toFixed(0)} <span>SPEED (wpm)</span> </div>
-				<div className="overview-accuracy"> {accuracyInfo.accuracy}% <span>ACCURACY</span> </div>
-				<div className="overview-time"> {(time / 1000).toFixed(0)} <span>TIME (secs)</span> </div>
+				<div className="overview-speed">
+					{speed.toFixed(0)}
+					<span>SPEED (wpm)</span>
+				</div>
+				<div className="overview-accuracy">
+					{accuracyInfo.accuracy}%<span>ACCURACY</span>
+				</div>
+				<div className="overview-time">
+					{(time / 1000).toFixed(0)}
+					<span>TIME (secs)</span>
+				</div>
+				<div className="overview-focus">
+					100%
+					<span>Focus</span>
+				</div>
 			</div>
 
 			<div className="overview-buttons">
-				<button className="try-again" onClick={() => incrementLevel(0)}> Try Again </button>
+				<button className="try-again" onClick={() => incrementLevel(0)}>
+					Try Again
+				</button>
 				{nextButton}
 			</div>
 		</div>

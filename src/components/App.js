@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { AccuracyInfoProvider } from '../contexts/AccuracyInfo';
+import { AccuracyInfoProvider } from '../contexts/AccuracyInfoContext';
 import { ColorsProvider } from '../contexts/ColorsContext';
 import { IndexInfoProvider } from '../contexts/IndexInfoContext';
 import { InputProvider } from '../contexts/InputContext';
 import Lesson from './Lesson.js';
 import LevelList from './LevelList.js';
 import Overview from './Overview.js';
+import { GazerProvider } from '../contexts/GazerContext';
+import Calibrator from './Calibrator';
 
 /*
 notes:
@@ -19,11 +21,18 @@ swaps between the home level list display, the level display, and the overview d
 */
 
 function App() {
+	const [calibrating, setCalibrating] = useState(false);
 	const [user, setUser] = useState('Guest'); // user data - eventually connect to database
 	const [levelSelected, selectLevel] = useState(null); // current level selected
 	const [lessons, setLessons] = useState(LESSONS); // holds all of the lesson data- eventually from database
-	const [main, setMain] = useState(<LevelList levels={lessons} selectLevel={selectLevel} />); // determains what is displayed below the header
+	const [main, setMain] = useState(
+		<LevelList
+			levels={lessons}
+			selectLevel={selectLevel}
+		/>
+	); // determains what is displayed below the header
 	const [previousData, setPreviousData] = useState(null); // hold the info from the level just played, showed in level overview
+	const [loaded, setLoaded] = useState(false);
 
 	// changes the main display when home button clicked, when a level is selected and when lessons are finished
 	useEffect(handleMainChange, [levelSelected, previousData]);
@@ -66,34 +75,60 @@ function App() {
 	function handleHome() {
 		setPreviousData(null);
 		selectLevel(null);
+		setCalibrating(false);
 	}
 
-	return (
-		<div className="App">
-			<div className="header">
-				<button onClick={handleHome} className="header-item header-home">
-					Home
-				</button>
-				<div className="header-item header-level">
-					{levelSelected !== null ? lessons[levelSelected].title : null}
-				</div>
-				<button className="header-item header-settings">settings</button>
-				<button className="header-item header-user">{user}</button>
-			</div>
+	function toggleCalibrating() {
+		console.log('toggled')
+		setCalibrating(calibrating => !calibrating);
+	}
 
-			<div className="main-container">
-				<InputProvider>
-					<IndexInfoProvider>
-						<ColorsProvider>
-							<AccuracyInfoProvider>
-								{main}
-							</AccuracyInfoProvider>
-						</ColorsProvider>
-					</IndexInfoProvider>
-				</InputProvider>
+	useEffect(() => {
+		const scriptTag = document.createElement('script');
+		scriptTag.src = 'https://webgazer.cs.brown.edu/webgazer.js?';
+		scriptTag.addEventListener('load', ()=>setLoaded(true));
+		document.body.appendChild(scriptTag);
+	}, [])
+
+	if (loaded) {
+		return (
+			<div className="App">
+				<div className="header">
+					<button onClick={handleHome} className="header-item header-home">
+						Home
+					</button>
+					<div className="header-item header-level">
+						{levelSelected !== null ? lessons[levelSelected].title : null}
+					</div>
+					<button
+						className="header-item header-calibrate"
+						onClick={toggleCalibrating}
+					>
+						calibrate
+					</button>
+					<button className="header-item header-settings">settings</button>
+					<button className="header-item header-user">{user}</button>
+				</div>
+
+				<div className="main-container">
+					<GazerProvider>
+						<InputProvider>
+							<IndexInfoProvider>
+								<ColorsProvider>
+									<AccuracyInfoProvider>
+										{calibrating ? <Calibrator setCalibrating={setCalibrating}/> : null}
+										{main}
+									</AccuracyInfoProvider>
+								</ColorsProvider>
+							</IndexInfoProvider>
+						</InputProvider>
+					</GazerProvider>
+				</div>
 			</div>
-		</div>
-	);
+		);
+	} else {
+		return (<>loading</>);
+	}
 }
 
 // lesson data - eventually from database
