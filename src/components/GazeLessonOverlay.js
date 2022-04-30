@@ -1,6 +1,16 @@
 import React from "react";
 
 function GazeLessonOverlay({y, boxOffset}) {
+
+	const gazeBoxStyle = {
+		width: '100px',
+		height: '100px',
+		borderRadius: '0.25rem',
+		boxShadow: '0 0 5px 2px rgba(0, 0, 0, 0.3)',
+		position: 'absolute',
+		top: y-50,
+	}
+
   return (
     <div className="gaze-lesson-overlay">
       <div

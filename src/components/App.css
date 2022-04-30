@@ -230,7 +230,8 @@ body {
 
 .overview-speed,
 .overview-accuracy,
-.overview-time {
+.overview-time, 
+.overview-looks {
 	font-size: 4rem;
 	display: flex;
 	flex-direction: column;
@@ -253,7 +254,6 @@ body {
 	height: calc(100vh - 25px);
 }
 
-
 .calibrator {
 	height: 100vh;
 	background-color: rgb(218, 216, 210);
@@ -267,4 +267,13 @@ body {
 
 .gaze-lesson-overlay {
 	z-index: -100;
+}
+
+.calibrate-text {
+	position: absolute;
+	height:50%;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }

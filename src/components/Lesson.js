@@ -13,12 +13,15 @@ import {
 } from '../contexts/AccuracyInfoContext.js';
 import { useGazeData, useGazeTime } from '../contexts/GazerContext.js';
 import GazeLessonOverlay from './GazeLessonOverlay.js';
+import { useHasCalibrated, useUpdateHasCalibrated } from '../contexts/HasCalibratedContex.js';
 
-function Lesson({ lessons, setLessons, levelSelected, setPreviousData }) {
+function Lesson({ lessons, setLessons, levelSelected, setPreviousData, setCalibrating}) {
 	const gazeData = useGazeData();
 	const gazeTime = useGazeTime();
 	const [prevY, setPrevY] = useState([]);
+	const [prevX, setPrevX] = useState([]);
 	const [y, setY] = useState(0);
+	const [x, setX] = useState(0);
 	const accuracyInfo = useAccuracyInfo(); // {number of characters correctly typed, number of total key presses, correct/incorrect}
 	const setAccuracyInfo = useUpdateAccuracyInfo();
 	const setColors = useUpdateColors();
@@ -34,12 +37,23 @@ function Lesson({ lessons, setLessons, levelSelected, setPreviousData }) {
 	const [started, setStarted] = useState(false); // was the lesson started?
 	let rows = setRows(); // initializes the text rows for the lesson wndow
 	const boxOffset = window.innerHeight/4;
+	const [lookingDown, setLookingDown] = useState(false);
+	const [lookingDownCount, setLookingDownCount] = useState(0);
+	const hasCalibrated = useHasCalibrated();
+	const setHasCalibrated = useUpdateHasCalibrated();
 
 	useEffect(() => {
-		// console.log(gazeData, gazeTime)
-		handlePrevYChange(gazeData.y);
-		if (gazeData && gazeData.y > bottomLimit) {
+		handlePrevPosChange(gazeData.x, gazeData.y);
+		if (gazeData && y > bottomLimit) {
 			console.log("don't look at the keyboard!!!");
+			if (timerOn && started && !lookingDown) {
+				setLookingDownCount(lookingDownCount => lookingDownCount+1);
+				setLookingDown(lookingDown => !lookingDown);
+			}
+		} else {
+			if (lookingDown) {
+				setLookingDown(lookingDown => !lookingDown);
+			}
 		}
 	}, [gazeData, gazeTime, bottomLimit]);
 
@@ -61,8 +75,12 @@ function Lesson({ lessons, setLessons, levelSelected, setPreviousData }) {
 
 	// adds/removes keydown/keyup event listeners
 	useEffect(() => {
+
 		window.addEventListener('keydown', handleKeyPress);
 		window.addEventListener('keyup', handleKeyUp);
+		if (!hasCalibrated) {
+			setCalibrating(true);
+		}
 		return () => {
 			window.removeEventListener('keydown', handleKeyPress);
 			window.removeEventListener('keyup', handleKeyUp);
@@ -106,10 +124,14 @@ function Lesson({ lessons, setLessons, levelSelected, setPreviousData }) {
 
 	// updates lessons data and level just played data & reset contexts on level end - eventually add database update here
 	useEffect(() => {
+		// !timerOn && started == lesson finished
 		if (!timerOn && started) {
 			let tempLessonData = [...lessons];
 			if (speed > tempLessonData[levelSelected].speed) {
 				tempLessonData[levelSelected].speed = speed;
+			}
+			if (!tempLessonData[levelSelected].looksDown || tempLessonData[levelSelected].looksDown > lookingDownCount) {
+				tempLessonData[levelSelected].looksDown = lookingDownCount;
 			}
 			setLessons(tempLessonData);
 			handlePreviousDataChange();
@@ -142,22 +164,35 @@ function Lesson({ lessons, setLessons, levelSelected, setPreviousData }) {
 			speed: speed,
 			accuracyInfo: accuracyInfo,
 			time: time,
+			looksDown: lookingDownCount
 		};
 		console.log(tempData);
 		setPreviousData(tempData);
 	}
 
-	function handlePrevYChange(newY) {
+	function handlePrevPosChange(newX, newY) {
+		let maxDataForAvg = 15;
 		let tempPrevY = prevY;
-		if (tempPrevY.length > 25) {
+		if (tempPrevY.length > maxDataForAvg) {
 			tempPrevY.shift();
 			tempPrevY.push(newY);
 		} else {
 			tempPrevY.push(newY);
 		}
 		const avgY = tempPrevY.reduce((a, b) => a + b) / tempPrevY.length;
+
+		let tempPrevX = prevX;
+		if (tempPrevX.length > maxDataForAvg) {
+			tempPrevX.shift();
+			tempPrevX.push(newX);
+		} else {
+			tempPrevX.push(newX);
+		}
+		const avgX = tempPrevX.reduce((a, b) => a + b) / tempPrevX.length;
 		setPrevY(tempPrevY);
 		setY(avgY);
+		setPrevX(tempPrevX);
+		setX(avgX)
  	}
 
 	// creates all the key components for the keyboard
@@ -257,9 +292,12 @@ function Lesson({ lessons, setLessons, levelSelected, setPreviousData }) {
 						<div className="lesson-speed-text">WPM</div>
 					</div>
 					<div className="lesson-focus">
-						<div className="lesson-focus-data">{time / 1000}</div>
+						{/* timer testing stuff */}
+						{/* <div className="lesson-focus-data">{time / 1000}</div>
 						<div>{numLetters}</div>
-						<div className="lesson-focus-text">timerOn</div>
+						<div className="lesson-focus-text">timerOn</div> */}
+						<div className="lesson-focus-data">{lookingDownCount}</div>
+						<div className="lesson-focus-text">Keyboard Looks</div>
 					</div>
 				</div>
 			</div>

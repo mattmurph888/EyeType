@@ -9,10 +9,13 @@ import LevelList from './LevelList.js';
 import Overview from './Overview.js';
 import { GazerProvider } from '../contexts/GazerContext';
 import Calibrator from './Calibrator';
+import { HasCalibratedProvider } from '../contexts/HasCalibratedContex';
 
 /*
-notes:
-
+General Notes: 
+	- the calibrating page does not dynamically change size
+	- hightlight the current key to be pressed on the virtual keyboard
+	- add database for new
 */
 
 /*
@@ -26,20 +29,16 @@ function App() {
 	const [levelSelected, selectLevel] = useState(null); // current level selected
 	const [lessons, setLessons] = useState(LESSONS); // holds all of the lesson data- eventually from database
 	const [main, setMain] = useState(
-		<LevelList
-			levels={lessons}
-			selectLevel={selectLevel}
-		/>
+		<LevelList levels={lessons} selectLevel={selectLevel} />
 	); // determains what is displayed below the header
 	const [previousData, setPreviousData] = useState(null); // hold the info from the level just played, showed in level overview
-	const [loaded, setLoaded] = useState(false);
 
 	// changes the main display when home button clicked, when a level is selected and when lessons are finished
 	useEffect(handleMainChange, [levelSelected, previousData]);
 
 	// sets the display for everything under the header
 	function handleMainChange() {
-		console.log(levelSelected);
+		console.log('handling main change');
 		if (levelSelected === null) {
 			setMain(<LevelList levels={lessons} selectLevel={selectLevel} />);
 		} else {
@@ -49,6 +48,7 @@ function App() {
 						speed={previousData.speed}
 						accuracyInfo={previousData.accuracyInfo}
 						time={previousData.time}
+						looksDown={previousData.looksDown}
 						lesson={lessons[levelSelected]}
 						maxLesson={lessons.length}
 						levelSelected={levelSelected}
@@ -65,6 +65,7 @@ function App() {
 						selectLevel={selectLevel}
 						previousData={previousData}
 						setPreviousData={setPreviousData}
+						setCalibrating={setCalibrating}
 					/>
 				);
 			}
@@ -79,56 +80,52 @@ function App() {
 	}
 
 	function toggleCalibrating() {
-		console.log('toggled')
-		setCalibrating(calibrating => !calibrating);
+		setCalibrating((calibrating) => !calibrating);
 	}
 
-	useEffect(() => {
-		const scriptTag = document.createElement('script');
-		scriptTag.src = 'https://webgazer.cs.brown.edu/webgazer.js?';
-		scriptTag.addEventListener('load', ()=>setLoaded(true));
-		document.body.appendChild(scriptTag);
-	}, [])
-
-	if (loaded) {
-		return (
-			<div className="App">
-				<div className="header">
-					<button onClick={handleHome} className="header-item header-home">
-						Home
-					</button>
-					<div className="header-item header-level">
-						{levelSelected !== null ? lessons[levelSelected].title : null}
-					</div>
+	return (
+		<div className="App">
+			
+			{ !calibrating ? (
+			<div className="header">
+				<button onClick={handleHome} className="header-item header-home">
+					Home
+				</button>
+				<div className="header-item header-level">
+					{levelSelected !== null ? lessons[levelSelected].title : null}
+				</div>
+				{levelSelected ? (
 					<button
 						className="header-item header-calibrate"
 						onClick={toggleCalibrating}
 					>
-						calibrate
+						re-calibrate
 					</button>
-					<button className="header-item header-settings">settings</button>
-					<button className="header-item header-user">{user}</button>
-				</div>
+				) : null}
+				<button className="header-item header-settings">settings</button>
+				<button className="header-item header-user">{user}</button>
+			</div> )
+			: null}
 
-				<div className="main-container">
-					<GazerProvider>
-						<InputProvider>
-							<IndexInfoProvider>
-								<ColorsProvider>
-									<AccuracyInfoProvider>
-										{calibrating ? <Calibrator setCalibrating={setCalibrating}/> : null}
-										{main}
-									</AccuracyInfoProvider>
-								</ColorsProvider>
-							</IndexInfoProvider>
-						</InputProvider>
-					</GazerProvider>
-				</div>
+			<div className="main-container">
+				<GazerProvider>
+					<InputProvider>
+						<IndexInfoProvider>
+							<ColorsProvider>
+								<AccuracyInfoProvider>
+									<HasCalibratedProvider>
+										{calibrating ? (
+											<Calibrator setCalibrating={setCalibrating} />
+										) : main}
+									</HasCalibratedProvider>
+								</AccuracyInfoProvider>
+							</ColorsProvider>
+						</IndexInfoProvider>
+					</InputProvider>
+				</GazerProvider>
 			</div>
-		);
-	} else {
-		return (<>loading</>);
-	}
+		</div>
+	);
 }
 
 // lesson data - eventually from database
@@ -138,6 +135,7 @@ const LESSONS = [
 		highScore: 0,
 		prevAccuracy: 0,
 		speed: 0,
+		looksDown: null,
 		icon: ':D',
 		title: 'Peace and Prosperity',
 	},
@@ -146,6 +144,7 @@ const LESSONS = [
 		highScore: 0,
 		prevAccuracy: 0,
 		speed: 0,
+		looksDown: null,
 		icon: ':D',
 		title: 'Failure',
 	},
@@ -154,6 +153,7 @@ const LESSONS = [
 		highScore: 0,
 		prevAccuracy: 0,
 		speed: 0,
+		looksDown: null,
 		icon: ':D',
 		title: 'Help',
 	},
@@ -162,6 +162,7 @@ const LESSONS = [
 		highScore: 0,
 		prevAccuracy: 0,
 		speed: 0,
+		looksDown: null,
 		icon: ':D',
 		title: 'Wisdom',
 	},
@@ -170,6 +171,7 @@ const LESSONS = [
 		highScore: 0,
 		prevAccuracy: 0,
 		speed: 0,
+		looksDown: null,
 		icon: ':D',
 		title: 'Pride',
 	},
@@ -178,6 +180,7 @@ const LESSONS = [
 		highScore: 0,
 		prevAccuracy: 0,
 		speed: 0,
+		looksDown: null,
 		icon: ':D',
 		title: 'Life',
 	},
@@ -186,6 +189,7 @@ const LESSONS = [
 		highScore: 0,
 		prevAccuracy: 0,
 		speed: 0,
+		looksDown: null,
 		icon: ':D',
 		title: 'Hope',
 	},
@@ -194,6 +198,7 @@ const LESSONS = [
 		highScore: 0,
 		prevAccuracy: 0,
 		speed: 0,
+		looksDown: null,
 		icon: ':D',
 		title: 'Good Things',
 	},
@@ -202,6 +207,7 @@ const LESSONS = [
 		highScore: 0,
 		prevAccuracy: 0,
 		speed: 0,
+		looksDown: null,
 		icon: ':D',
 		title: 'test level',
 	},

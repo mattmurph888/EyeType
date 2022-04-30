@@ -4,11 +4,13 @@ function Overview({
 	speed,
 	accuracyInfo,
 	time,
+	looksDown,
 	lesson,
 	maxLesson,
 	levelSelected,
 	selectLevel,
 	setPreviousData,
+
 }) {
 	const [nextButton] = useState(initNextButton());
 
@@ -33,7 +35,7 @@ function Overview({
 	return (
 		<div className="overview">
 			<div className="overview-title">
-				Lesson {levelSelected}: {lesson.title}{' '}
+				Lesson {levelSelected+1}: {lesson.title}{' '}
 			</div>
 
 			<div className="overview-data">
@@ -48,9 +50,9 @@ function Overview({
 					{(time / 1000).toFixed(0)}
 					<span>TIME (secs)</span>
 				</div>
-				<div className="overview-focus">
-					100%
-					<span>Focus</span>
+				<div className="overview-looks">
+					{looksDown}
+					<span>Looks Down</span>
 				</div>
 			</div>
 
